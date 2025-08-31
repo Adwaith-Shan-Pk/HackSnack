@@ -11,11 +11,8 @@ function App() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // --- THIS IS THE DEBUGGING LINE ---
-        // It will print the API URL to your browser's console.
-        console.log('Attempting to use API URL:', import.meta.env.VITE_API_URL);
-
-        // Vite uses import.meta.env for environment variables
+        
+        //console.log('Attempting to use API URL:', import.meta.env.VITE_API_URL);
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
         const response = await fetch(`${apiUrl}/api/projects`);
         
