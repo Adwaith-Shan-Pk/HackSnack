@@ -9,7 +9,8 @@ const PORT = process.env.PORT || 5001;
 
 // --- Secure CORS Configuration ---
 const allowedOrigins = [
-  'http://localhost:5173', // Local dev environment
+  'http://localhost:5173',
+'https://hacksnack.shan.is-a.dev', // Local dev environment
   process.env.FRONTEND_URL // Deployed frontend URL from .env
 ];
 
