@@ -1,38 +1,46 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config(); 
+require('dotenv').config();
+
 const app = express();
-const PORT = process.env.PORT || 5001;
+const port = process.env.PORT || 5001;
+
+// --- Configure CORS ---
+const allowedOrigins = [
+  'http://localhost:5173', 
+  process.env.FRONTEND_URL  
+].filter(Boolean); // This removes any falsy values (like undefined) if FRONTEND_URL is not set
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // For this project, we want to be strict and only allow our frontend.
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+};
+app.use(cors(corsOptions));
 
 // --- Middleware ---
-app.use(cors());
 app.use(express.json());
 
-// --- MongoDB Connection ---
-const mongoURI = process.env.MONGO_URI;
-if (!mongoURI) {
-    console.error("FATAL ERROR: MONGO_URI is not defined in the .env file.");
-    process.exit(1); 
-}
-
-mongoose.connect(mongoURI)
-    .then(() => console.log("Successfully connected to MongoDB Atlas!"))
-    .catch(err => console.error("MongoDB connection error:", err));
-
-
-
-// A simple test route to ensure the server is running
-app.get('/', (req, res) => {
-    res.send('<h1>Blog API </h1><p>Welcome! The server is up and running.</p>');
-});
-
-// Import and use the routes for projects/blogs
+// --- Routes ---
 const projectRoutes = require('./routes/projects');
 app.use('/api/projects', projectRoutes);
 
 
-// --- Start the Server ---
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// --- Connect to DB & Start Server ---
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(port, () => {
+      console.log(`Server is running on port: ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Could not connect to MongoDB:', err);
+  });
+
