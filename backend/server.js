@@ -1,52 +1,55 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const projectRoutes = require('./routes/projects');
 
 const app = express();
-const port = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5001;
 
-// --- Configure CORS (Temporarily Disabled for Debugging) ---
-// This will allow requests from ANY origin.
-app.use(cors());
-
-/*
-// --- Original Stricter CORS Configuration ---
+// --- Secure CORS Configuration ---
 const allowedOrigins = [
-  'http://localhost:5173', // Your local frontend for development
-  process.env.FRONTEND_URL  // Your deployed frontend URL (add this to your .env and Vercel env variables)
-].filter(Boolean);
+  'http://localhost:5173', // Local dev environment
+  process.env.FRONTEND_URL // Deployed frontend URL from .env
+];
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
+  optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));
-*/
 
-// --- Middleware ---
+app.use(cors(corsOptions));
+// --- End of CORS Configuration ---
+
 app.use(express.json());
 
-// --- Routes ---
-const projectRoutes = require('./routes/projects');
+// A simple welcome route
+app.get('/', (req, res) => {
+  res.send('Welcome to the Project Showcase API');
+});
+
 app.use('/api/projects', projectRoutes);
 
-
-// --- Connect to DB & Start Server ---
-// This ensures we don't start listening for requests until the database is connected.
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(port, () => {
-      console.log(`Server is running on port: ${port}`);
+// Connect to DB and start server
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('Successfully connected to MongoDB!');
+    app.listen(PORT, () => {
+      console.log(`Server is running on port: ${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error('Could not connect to MongoDB:', err);
-  });
+  } catch (error) {
+    console.error('Could not connect to MongoDB:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
 
