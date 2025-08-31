@@ -6,16 +6,20 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5001;
 
-// --- Configure CORS ---
+// --- Configure CORS (Temporarily Disabled for Debugging) ---
+// This will allow requests from ANY origin.
+app.use(cors());
+
+/*
+// --- Original Stricter CORS Configuration ---
 const allowedOrigins = [
-  'http://localhost:5173', 
-  process.env.FRONTEND_URL  
-].filter(Boolean); // This removes any falsy values (like undefined) if FRONTEND_URL is not set
+  'http://localhost:5173', // Your local frontend for development
+  process.env.FRONTEND_URL  // Your deployed frontend URL (add this to your .env and Vercel env variables)
+].filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // For this project, we want to be strict and only allow our frontend.
-    if (allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -23,6 +27,7 @@ const corsOptions = {
   },
 };
 app.use(cors(corsOptions));
+*/
 
 // --- Middleware ---
 app.use(express.json());
@@ -33,6 +38,7 @@ app.use('/api/projects', projectRoutes);
 
 
 // --- Connect to DB & Start Server ---
+// This ensures we don't start listening for requests until the database is connected.
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
