@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: hacksnack
+    ports:
+      - "5001:5001"
+    environment:
+      MONGO_URI: #fill in your MongoDB connection string 
+      PORT: 5001
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+volumes:
+  # This named volume will persist MongoDB data across container restarts
+  mongo-data:
+

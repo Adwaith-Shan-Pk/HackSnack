@@ -1,0 +1,10 @@
+General
+node_modules
+.env
+npm-debug.log
+.git
+.vscode
+README.md
+frontend/node_modules
+frontend/dist
+backend/node_modules
